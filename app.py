@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, Response
-from flask_cors import CORS
+
 
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,7 +7,7 @@ from bson import json_util
 from bson.objectid import ObjectId
 
 app = Flask(__name__)
-CORS(app)
+
 app.config['MONGO_URI'] = 'mongodb+srv://OtterFox:1XTQqHNw9X7XvkXs@cluster0.uwltrza.mongodb.net/mineria'
 
 mongo = PyMongo(app)
