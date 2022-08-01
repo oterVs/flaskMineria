@@ -94,7 +94,7 @@ def create_user():
         return make_response(respuesta, 200, headers)
 
 
-@app.route("/user/validate", methods=["GET"])
+@app.route("/user/validate", methods=["POST"])
 def validate_user():
     headers = {"Content-Type": "application/json"}
     usuario = request.json["usuario"]
