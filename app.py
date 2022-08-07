@@ -27,7 +27,7 @@ def get_recipestwy():
             "data": recipesRecuperadas
             }
         )
-    return make_response(respuesta, 200, headers)
+    return Response(response, mimetype="application/json")
 
 
 
