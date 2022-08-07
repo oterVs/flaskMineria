@@ -15,6 +15,22 @@ app.config[
 mongo = PyMongo(app)
 
 
+@app.route("/recipetwy", methods=["GET"])
+def get_recipestwy():
+    headers = {"Content-Type": "application/json"}
+    recipes = mongo.db.recipes.find()
+    response = json_util.dumps(recipes)
+    recipesRecuperadas= json.loads(response)
+    respuesta = jsonify({
+            "message": "Recipes", 
+            "status": 200,
+            "data": recipesRecuperadas
+            }
+        )
+    return make_response(respuesta, 200, headers)
+
+
+
 @app.route("/recipe/add", methods=["POST"])
 def create_recipe():
     nombre = request.json["nombre"]
@@ -53,6 +69,7 @@ def get_user_recipes(email):
     recipes = mongo.db.recipes.find({"author": email})
     response = json_util.dumps(recipes)
     return Response(response, mimetype="application/json")
+
 
 
 @app.route("/user/add", methods=["POST"])
