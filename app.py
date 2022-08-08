@@ -14,7 +14,7 @@ app.config[
 
 mongo = PyMongo(app)
 
-
+#Este metodo recupera todas las recetas disponibles
 @app.route("/recipetwy", methods=["GET"])
 def get_recipestwy():
     headers = {"Content-Type": "application/json"}
@@ -31,6 +31,8 @@ def get_recipestwy():
 
 
 
+
+#Este metodo añade una receta, perteneciente a un usuario
 @app.route("/recipe/add", methods=["POST"])
 def create_recipe():
     nombre = request.json["nombre"]
@@ -56,12 +58,12 @@ def create_recipe():
     )
     return "hallo"
 
-
+#Este metodo añade una receta a los favoritos del usuario
 @app.route("/addfavorite/<email>/", methods=["PUT"])
 def add_recipe_favorite(email):
     favorites = request.json["favorites"]
-    mongo.db.users.update_one({"email": email}, {"$set": {"favorites": favorites}})
-    return "Pos valio madres"
+    mongo.db.users.update_one({"usuario": email}, {"$set": {"favorites": favorites}})
+    return Response({"status": 200, "mensaje": "actualizacion exitosa"}, mimetype="application/json")
 
 
 @app.route("/<email>/recipes", methods=["GET"])
@@ -71,7 +73,7 @@ def get_user_recipes(email):
     return Response(response, mimetype="application/json")
 
 
-
+#Añade un usuario a la base de datos
 @app.route("/user/add", methods=["POST"])
 def create_user():
     usuario = request.json["usuario"]
