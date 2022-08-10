@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, Response, make_response
-
+from collections import Counter
+import collections
 import json
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -29,7 +30,53 @@ def get_recipestwy():
         )
     return Response(response, mimetype="application/json")
 
+#Se obtiene una receta en especifico
+@app.route("/getRecipeu/<id>/",  methods=["GET"])
+def get_recipeId(id):
+    receta = mongo.db.recipes.find_one({"_id": ObjectId(id)})
+    response = json_util.dumps(receta)
+    return Response(response, mimetype="application/json")
 
+@app.route("/recipeTotal", methods=["GET"])
+def get_recipesTotal():
+    headers = {"Content-Type": "application/json"}
+    
+    recipes = mongo.db.recipes.find()
+    response = json_util.dumps(recipes)
+    recipesRecuperadas= json.loads(response)
+    resultado = dict()
+    
+    print(type(response))
+    for x in recipesRecuperadas:
+        #conteo = Counter(x["ingredients"])
+        
+        ingredientes = x["ingredients"]
+        for ing in ingredientes:  
+            if(ing in resultado):
+                resultado[ing] +=1
+            else:
+                resultado[ing] = 1
+            #valor=conteo[clave]
+
+            #if valor != 1:
+                #resultado[clave] = valor
+
+                #if resultado.key(clave) != None:
+                    #resultado[clave] = resultado[clave] + valor
+                #else:   
+                    #resultado[clave] = valor         
+        #print(re)
+    resultadoOr = dict(sorted(resultado.items(), key=lambda item: item[1]))
+    #resultadoOr = collections.OrderedDict(resultado)
+    print(resultadoOr)
+    
+    respuesta = jsonify({
+            "message": "Recipes", 
+            "status": 200,
+            "data": recipesRecuperadas
+            }
+        )
+    return Response(response, mimetype="application/json")
 
 
 #Este metodo añade una receta, perteneciente a un usuario
@@ -65,7 +112,7 @@ def add_recipe_favorite(email):
     mongo.db.users.update_one({"usuario": email}, {"$set": {"favorites": favorites}})
     return Response({"status": 200, "mensaje": "actualizacion exitosa"}, mimetype="application/json")
 
-
+#Retorna las recetas de un autor
 @app.route("/<email>/recipes", methods=["GET"])
 def get_user_recipes(email):
     recipes = mongo.db.recipes.find({"author": email})
@@ -112,7 +159,7 @@ def create_user():
         )
         return make_response(respuesta, 200, headers)
 
-
+#Valida si un usuario esta en la base de datos
 @app.route("/user/validate", methods=["POST"])
 def validate_user():
     headers = {"Content-Type": "application/json"}
@@ -136,14 +183,14 @@ def validate_user():
         response = jsonify({"message": "Usuario no existe ", "status": 404})
         return response
 
-
+#Retorna todos los usuarios
 @app.route("/users", methods=["GET"])
 def get_users():
     users = mongo.db.users.find()
     response = json_util.dumps(users)
     return Response(response, mimetype="application/json")
 
-
+#Busca un usuario en especifico por id
 @app.route("/user/<id>", methods=["GET"])
 def get_user(id):
     user = mongo.db.users.find_one({"_id": ObjectId(id)})
@@ -151,7 +198,7 @@ def get_user(id):
     response = json_util.dumps(user)
     return Response(response, mimetype="application/json")
 
-
+#Busca un usaurio por el nombre de usuaior
 @app.route("/usere/<email>", methods=["GET"])
 def get_usere(email):
     user = mongo.db.users.find_one({"email": email})
@@ -159,7 +206,7 @@ def get_usere(email):
     response = json_util.dumps(user)
     return Response(response, mimetype="application/json")
 
-
+#Error
 @app.errorhandler(404)
 def not_found(error=None):
     response = jsonify({"message": "Resource Not foud" + request.url, "status": 404})
