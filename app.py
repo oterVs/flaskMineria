@@ -37,6 +37,21 @@ def get_recipeId(id):
     response = json_util.dumps(receta)
     return Response(response, mimetype="application/json")
 
+
+#Se obtiene una receta en especifico
+@app.route("/getRecipesF",  methods=["POST"])
+def get_recipeFav():
+    recetas_recuperadas = []
+    recetas = request.json["recetas"]
+    for x in recetas:
+        receta = mongo.db.recipes.find_one({"_id": ObjectId(x)})
+        objeto = json_util.dumps(receta)
+        recetas_recuperadas.append(objeto)
+    #receta = mongo.db.recipes.find_one({"_id": ObjectId(id)})
+    #response = json_util.dumps(receta)
+    return Response(recetas_recuperadas, mimetype="application/json")
+
+
 @app.route("/recipeTotal", methods=["GET"])
 def get_recipesTotal():
     headers = {"Content-Type": "application/json"}
