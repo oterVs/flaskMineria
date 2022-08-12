@@ -41,15 +41,30 @@ def get_recipeId(id):
 #Se obtiene una receta en especifico
 @app.route("/getRecipesF",  methods=["POST"])
 def get_recipeFav():
+    headers = {"Content-Type": "application/json"}
     recetas_recuperadas = []
     recetas = request.json["recetas"]
     for x in recetas:
         receta = mongo.db.recipes.find_one({"_id": ObjectId(x)})
-        objeto = json_util.dumps(receta)
-        recetas_recuperadas.append(objeto)
+      
+        objeto = json_util.dumps(receta,indent=2)
+        #print(objeto)
+        recetas_recuperadas.append(json.loads(objeto))
+     
     #receta = mongo.db.recipes.find_one({"_id": ObjectId(id)})
-    #response = json_util.dumps(receta)
-    return Response(recetas_recuperadas, mimetype="application/json")
+    res = jsonify(items=[dict(a=1, b=2), dict(c=3, d=4)])
+    response = json_util.dumps(recetas_recuperadas)
+    print(recetas_recuperadas[0])
+    respuesta = jsonify({
+            "message": "Recipes", 
+            "status": 200,
+            "data": recetas_recuperadas
+            }
+        )
+    diccionario = {
+        "data": recetas_recuperadas
+    }
+    return diccionario
 
 
 @app.route("/recipeTotal", methods=["GET"])
@@ -91,7 +106,7 @@ def get_recipesTotal():
             "data": recipesRecuperadas
             }
         )
-    return Response(response, mimetype="application/json")
+    return Response(recipesRecuperadas, mimetype="application/json")
 
 
 #Este metodo añade una receta, perteneciente a un usuario
