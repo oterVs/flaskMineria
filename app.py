@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, Response, make_response,flash,redirect
-import requests
+
 
 from collections import Counter
 from werkzeug.utils import secure_filename
@@ -47,13 +47,10 @@ def post_photo():
     ficheros = {
         "image": image
     }
-    r = requests.post("https://api.imgbb.com/1/upload?expiration=600&key=5eb17d3638835e60af978041f015e33c",headers=headers, files=image)
-    print(r)
-    if r.ok:
-        return "File uploaded!"
-    else:
-        return "Error uploading file!"
-    return "sii"
+    #r = requests.post("https://api.imgbb.com/1/upload?expiration=600&key=5eb17d3638835e60af978041f015e33c",headers=headers, files=image)
+    #print(r)
+    #if r.ok:
+    
 
 
 #Se obtiene una receta en especifico
