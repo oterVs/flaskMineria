@@ -154,6 +154,19 @@ def create_recipe():
             "author": author,
         }
     )
+
+    user = mongo.db.users.find_one({"usuario": author})
+    jsuser = json_util.dumps(user)
+    usuarioRecuperado = json.loads(jsuser)
+
+    recetas = []
+    recetas = usuarioRecuperado["recipes"]
+    recetas.append(str(id.inserted_id))
+
+    mongo.db.users.update_one({"usuario": author}, {"$set": {"recipes": recetas}})
+
+    print(recetas)
+
     response = {"status": 200, "mensaje": "Se añadió correctamente", "id": str(id.inserted_id)}
     #return Response({"status": 200, "mensaje": "Se añadió correctamente", "id": str(recip)}, mimetype="application/json")
     return response
@@ -163,6 +176,7 @@ def add_recipe_favorite(email):
     favorites = request.json["favorites"]
     mongo.db.users.update_one({"usuario": email}, {"$set": {"favorites": favorites}})
     return Response({"status": 200, "mensaje": "actualizacion exitosa"}, mimetype="application/json")
+
 
 #Retorna las recetas de un autor
 @app.route("/<email>/recipes", methods=["GET"])
@@ -222,6 +236,7 @@ def validate_user():
 
     jsuser = json_util.dumps(user)
     usuarioRecuperado = json.loads(jsuser)
+
     print(usuarioRecuperado)
     if usuarioRecuperado["usuario"] == usuario :
         respuesta = jsonify({
