@@ -154,7 +154,8 @@ def create_recipe():
             "author": author,
         }
     )
-    return Response({"status": 200, "mensaje": "Se añadió correctamente"}, mimetype="application/json")
+
+    return Response({"status": 200, "mensaje": "Se añadió correctamente", "id": str(recip)}, mimetype="application/json")
 
 #Este metodo añade una receta a los favoritos del usuario
 @app.route("/addfavorite/<email>/", methods=["PUT"])
