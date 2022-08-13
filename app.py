@@ -143,7 +143,7 @@ def create_recipe():
     pais = request.json["pais"]
     author = request.json["author"]
 
-    recip = mongo.db.recipes.insert_one(
+    id = mongo.db.recipes.insert_one(
         {
             "title": title,
             "imageUrl": imageUrl,
@@ -154,9 +154,9 @@ def create_recipe():
             "author": author,
         }
     )
-
-    return Response({"status": 200, "mensaje": "Se añadió correctamente", "id": str(recip)}, mimetype="application/json")
-
+    response = {"status": 200, "mensaje": "Se añadió correctamente", "id": str(id.inserted_id)}
+    #return Response({"status": 200, "mensaje": "Se añadió correctamente", "id": str(recip)}, mimetype="application/json")
+    return response
 #Este metodo añade una receta a los favoritos del usuario
 @app.route("/addfavorite/<email>/", methods=["PUT"])
 def add_recipe_favorite(email):
