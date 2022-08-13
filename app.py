@@ -1,5 +1,9 @@
-from flask import Flask, jsonify, request, Response, make_response
+from flask import Flask, jsonify, request, Response, make_response,flash,redirect
+import requests
+
 from collections import Counter
+from werkzeug.utils import secure_filename
+
 import collections
 import json
 from flask_pymongo import PyMongo
@@ -29,6 +33,28 @@ def get_recipestwy():
             }
         )
     return Response(response, mimetype="application/json")
+
+#Guarda una imagen
+@app.route("/savePhto",  methods=["POST"])
+def post_photo():
+    print("Posted file: {}".format(request.files['file']))
+    file = request.files['file']
+    image = {'image': file.read()}
+ 
+    headers = {
+        "Content-Type": "multipart/form-data", 
+    }
+    ficheros = {
+        "image": image
+    }
+    r = requests.post("https://api.imgbb.com/1/upload?expiration=600&key=5eb17d3638835e60af978041f015e33c",headers=headers, files=image)
+    print(r)
+    if r.ok:
+        return "File uploaded!"
+    else:
+        return "Error uploading file!"
+    return "sii"
+
 
 #Se obtiene una receta en especifico
 @app.route("/getRecipeu/<id>/",  methods=["GET"])
@@ -112,28 +138,26 @@ def get_recipesTotal():
 #Este metodo añade una receta, perteneciente a un usuario
 @app.route("/recipe/add", methods=["POST"])
 def create_recipe():
-    nombre = request.json["nombre"]
-    img = request.json["img"]
-    tiempo = request.json["tiempo"]
-    ingredientes = request.json["ingredientes"]
-    instrucciones = request.json["instrucciones"]
+    title = request.json["title"]
+    imageUrl = request.json["imageUrl"]
+    duration = request.json["duration"]
+    ingredients = request.json["ingredients"]
+    steps = request.json["steps"]
     pais = request.json["pais"]
-    diet = request.json["diet"]
     author = request.json["author"]
 
     recip = mongo.db.recipes.insert_one(
         {
-            "nombre": nombre,
-            "img": img,
-            "tiempo": tiempo,
-            "ingredientes": ingredientes,
-            "instrucciones": instrucciones,
+            "title": title,
+            "imageUrl": imageUrl,
+            "duration": duration,
+            "ingredients": ingredients,
+            "steps": steps,
             "pais": pais,
-            "diet": diet,
             "author": author,
         }
     )
-    return "hallo"
+    return Response({"status": 200, "mensaje": "Se añadió correctamente"}, mimetype="application/json")
 
 #Este metodo añade una receta a los favoritos del usuario
 @app.route("/addfavorite/<email>/", methods=["PUT"])
