@@ -34,6 +34,15 @@ def get_recipestwy():
         )
     return Response(response, mimetype="application/json")
 
+
+@app.route("/recipes/<size>/<pag>",methods=["GET"])
+def get_recipe_pag(size, pag):
+    skips = int(size) * (int(pag) - 1)
+    recipe= mongo.db.recipes.find().skip(skips).limit(int(size))
+    response = json_util.dumps(recipe)
+    return Response(response, mimetype="application/json")
+
+
 #Guarda una imagen
 @app.route("/savePhto",  methods=["POST"])
 def post_photo():
@@ -51,6 +60,15 @@ def post_photo():
     #print(r)
     #if r.ok:
     
+#Recetas mas recientes
+@app.route("/recipes/recient", methods=["GET"])
+def get_recipe_recients():
+    recipes = mongo.db.recipes.find().sort("_id", -1).limit(10)
+    response = json_util.dumps(recipes)
+    return Response(response, mimetype="application/json")
+
+#Recetas Ecuador 
+
 
 
 #Se obtiene una receta en especifico
