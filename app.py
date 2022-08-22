@@ -1,5 +1,5 @@
-from flask import Flask, jsonify, request, Response, make_response,flash,redirect
-
+from flask import Flask, jsonify, request, Response, make_response, flash, redirect
+from flask_cors import CORS, cross_origin
 
 from collections import Counter
 from werkzeug.utils import secure_filename
@@ -16,141 +16,192 @@ app = Flask(__name__)
 app.config[
     "MONGO_URI"
 ] = "mongodb+srv://OtterFox:1XTQqHNw9X7XvkXs@cluster0.uwltrza.mongodb.net/mineria"
-
+CORS(app)
 mongo = PyMongo(app)
 
-#Este metodo recupera todas las recetas disponibles
+# Este metodo recupera todas las recetas disponibles
 @app.route("/recipetwy", methods=["GET"])
 def get_recipestwy():
     headers = {"Content-Type": "application/json"}
     recipes = mongo.db.recipes.find()
     response = json_util.dumps(recipes)
-    recipesRecuperadas= json.loads(response)
-    respuesta = jsonify({
-            "message": "Recipes", 
-            "status": 200,
-            "data": recipesRecuperadas
-            }
-        )
+    recipesRecuperadas = json.loads(response)
+    respuesta = jsonify(
+        {"message": "Recipes", "status": 200, "data": recipesRecuperadas}
+    )
     return Response(response, mimetype="application/json")
 
 
-@app.route("/recipes/<size>/<pag>",methods=["GET"])
+@cross_origin
+@app.route("/recipes/<size>/<pag>", methods=["GET"])
 def get_recipe_pag(size, pag):
     skips = int(size) * (int(pag) - 1)
-    recipe= mongo.db.recipes.find().skip(skips).limit(int(size))
+    recipe = mongo.db.recipes.find().skip(skips).limit(int(size))
     response = json_util.dumps(recipe)
     return Response(response, mimetype="application/json")
 
 
-#Guarda una imagen
-@app.route("/savePhto",  methods=["POST"])
+@app.route("/recipes/ingredientes", methods=["POST"])
+def get_recipe_ingredientes():
+    ingredintes = request.json["ingredientes"]
+    recipes = mongo.db.recipes.find()
+    response = json_util.dumps(recipes)
+    iteracion = json.loads(response)
+    respuesta = []
+    for x in iteracion:
+        esta = True
+        for y in ingredintes:
+            if y in x["ingredients"]:
+                esta = True
+            else:
+                esta = False
+                break
+        if esta:
+            respuesta.append(x)
+    # print(respuesta)
+    diccionario = {"data": respuesta}
+    return diccionario
+
+
+# Guarda una imagen
+@app.route("/savePhto", methods=["POST"])
 def post_photo():
-    print("Posted file: {}".format(request.files['file']))
-    file = request.files['file']
-    image = {'image': file.read()}
- 
-    headers = {
-        "Content-Type": "multipart/form-data", 
+    # print("Posted file: {}".format(request.files['data']))
+    file = request.files["file"]
+    print(file)
+
+    diccionario = {
+        "status": 200,
+        "data": [
+            {
+                "_id": {"$oid": "62f3cf79944789e684ef1213"},
+                "countedElements": 1,
+                "duration": "1 hora",
+                "imageUrl": "https://www.cocina-ecuatoriana.com/base/stock/Recipe/310-image/310-image_web.jpg",
+                "ingredients": [
+                    "squid",
+                    "Garlic",
+                    "cumin",
+                    "Salt",
+                    "lemon",
+                    "egg",
+                    "flour",
+                    "bread",
+                    "oil",
+                    "Pepper",
+                ],
+                "link": "https://www.cocina-ecuatoriana.com/recetas/entradas/calamares-fritos",
+                "steps": [
+                    "Lavar bien los calamares y córtelos en ruedas.",
+                    "Coloque los calamares en un bol y agregue el ajo machacado, comino, pimienta, salsa de soya y el jugo de limón.",
+                    "Mezcle bien todos los ingredientes y cubra el bol con papel film. Deje macerar en el refrigerador por unas 2 horas aproximadamente.",
+                    "Transcurrido el tiempo de maceración, pase los calamares por harina, luego por huevo batido y por último por la miga de pan.",
+                    "Fría los calamares en aceite bien caliente hasta que se doren.",
+                    "Sírvalos decorados con rodajas de limón y acompañados con alguna salsa de su preferencia.",
+                ],
+                "title": "Calamares fritos",
+            }
+        ],
     }
-    ficheros = {
-        "image": image
-    }
-    #r = requests.post("https://api.imgbb.com/1/upload?expiration=600&key=5eb17d3638835e60af978041f015e33c",headers=headers, files=image)
-    #print(r)
-    #if r.ok:
+    return diccionario
     
-#Recetas mas recientes
+    # image = {'image': file.read()}
+    # print(image)
+    # headers = {
+    # "Content-Type": "multipart/form-data",
+    # }
+    # ficheros = {
+    #   "image": image
+    # }
+    return "oka"
+    # r = requests.post("https://api.imgbb.com/1/upload?expiration=600&key=5eb17d3638835e60af978041f015e33c",headers=headers, files=image)
+    # print(r)
+    # if r.ok:
+
+
+# Recetas mas recientes
 @app.route("/recipes/recient", methods=["GET"])
 def get_recipe_recients():
     recipes = mongo.db.recipes.find().sort("_id", -1).limit(10)
     response = json_util.dumps(recipes)
     return Response(response, mimetype="application/json")
 
-#Recetas Ecuador 
+
+# Recetas Ecuador
 
 
-
-#Se obtiene una receta en especifico
-@app.route("/getRecipeu/<id>/",  methods=["GET"])
+# Se obtiene una receta en especifico
+@app.route("/getRecipeu/<id>/", methods=["GET"])
 def get_recipeId(id):
     receta = mongo.db.recipes.find_one({"_id": ObjectId(id)})
     response = json_util.dumps(receta)
     return Response(response, mimetype="application/json")
 
 
-#Se obtiene una receta en especifico
-@app.route("/getRecipesF",  methods=["POST"])
+# Se obtiene una receta en especifico
+@app.route("/getRecipesF", methods=["POST"])
 def get_recipeFav():
     headers = {"Content-Type": "application/json"}
     recetas_recuperadas = []
     recetas = request.json["recetas"]
     for x in recetas:
         receta = mongo.db.recipes.find_one({"_id": ObjectId(x)})
-      
-        objeto = json_util.dumps(receta,indent=2)
-        #print(objeto)
+
+        objeto = json_util.dumps(receta, indent=2)
+        # print(objeto)
         recetas_recuperadas.append(json.loads(objeto))
-     
-    #receta = mongo.db.recipes.find_one({"_id": ObjectId(id)})
+
+    # receta = mongo.db.recipes.find_one({"_id": ObjectId(id)})
     res = jsonify(items=[dict(a=1, b=2), dict(c=3, d=4)])
     response = json_util.dumps(recetas_recuperadas)
     print(recetas_recuperadas[0])
-    respuesta = jsonify({
-            "message": "Recipes", 
-            "status": 200,
-            "data": recetas_recuperadas
-            }
-        )
-    diccionario = {
-        "data": recetas_recuperadas
-    }
+    respuesta = jsonify(
+        {"message": "Recipes", "status": 200, "data": recetas_recuperadas}
+    )
+    diccionario = {"data": recetas_recuperadas}
     return diccionario
 
 
 @app.route("/recipeTotal", methods=["GET"])
 def get_recipesTotal():
     headers = {"Content-Type": "application/json"}
-    
+
     recipes = mongo.db.recipes.find()
     response = json_util.dumps(recipes)
-    recipesRecuperadas= json.loads(response)
+    recipesRecuperadas = json.loads(response)
     resultado = dict()
-    
+
     print(type(response))
     for x in recipesRecuperadas:
-        #conteo = Counter(x["ingredients"])
-        
+        # conteo = Counter(x["ingredients"])
+
         ingredientes = x["ingredients"]
-        for ing in ingredientes:  
-            if(ing in resultado):
-                resultado[ing] +=1
+        for ing in ingredientes:
+            if ing in resultado:
+                resultado[ing] += 1
             else:
                 resultado[ing] = 1
-            #valor=conteo[clave]
+            # valor=conteo[clave]
 
-            #if valor != 1:
-                #resultado[clave] = valor
+            # if valor != 1:
+            # resultado[clave] = valor
 
-                #if resultado.key(clave) != None:
-                    #resultado[clave] = resultado[clave] + valor
-                #else:   
-                    #resultado[clave] = valor         
-        #print(re)
+            # if resultado.key(clave) != None:
+            # resultado[clave] = resultado[clave] + valor
+            # else:
+            # resultado[clave] = valor
+        # print(re)
     resultadoOr = dict(sorted(resultado.items(), key=lambda item: item[1]))
-    #resultadoOr = collections.OrderedDict(resultado)
+    # resultadoOr = collections.OrderedDict(resultado)
     print(resultadoOr)
-    
-    respuesta = jsonify({
-            "message": "Recipes", 
-            "status": 200,
-            "data": recipesRecuperadas
-            }
-        )
+
+    respuesta = jsonify(
+        {"message": "Recipes", "status": 200, "data": recipesRecuperadas}
+    )
     return Response(recipesRecuperadas, mimetype="application/json")
 
 
-#Este metodo añade una receta, perteneciente a un usuario
+# Este metodo añade una receta, perteneciente a un usuario
 @app.route("/recipe/add", methods=["POST"])
 def create_recipe():
     title = request.json["title"]
@@ -185,18 +236,35 @@ def create_recipe():
 
     print(recetas)
 
-    response = {"status": 200, "mensaje": "Se añadió correctamente", "id": str(id.inserted_id)}
-    #return Response({"status": 200, "mensaje": "Se añadió correctamente", "id": str(recip)}, mimetype="application/json")
+    response = {
+        "status": 200,
+        "mensaje": "Se añadió correctamente",
+        "id": str(id.inserted_id),
+    }
+    # return Response({"status": 200, "mensaje": "Se añadió correctamente", "id": str(recip)}, mimetype="application/json")
     return response
-#Este metodo añade una receta a los favoritos del usuario
+
+
+# Este metodo añade una receta a los favoritos del usuario
 @app.route("/addfavorite/<email>/", methods=["PUT"])
 def add_recipe_favorite(email):
     favorites = request.json["favorites"]
     mongo.db.users.update_one({"usuario": email}, {"$set": {"favorites": favorites}})
-    return Response({"status": 200, "mensaje": "actualizacion exitosa"}, mimetype="application/json")
+    return Response(
+        {"status": 200, "mensaje": "actualizacion exitosa"}, mimetype="application/json"
+    )
 
 
-#Retorna las recetas de un autor
+# Retorna recetas por paises
+@app.route("/recipe/country/<pais>", methods=["GET"])
+def get_recipes_country(pais):
+    country = str(pais)
+    recipes = mongo.db.recipes.find({"pais": country})
+    response = json_util.dumps(recipes)
+    return Response(response, mimetype="application/json")
+
+
+# Retorna las recetas de un autor
 @app.route("/<email>/recipes", methods=["GET"])
 def get_user_recipes(email):
     recipes = mongo.db.recipes.find({"author": email})
@@ -204,7 +272,7 @@ def get_user_recipes(email):
     return Response(response, mimetype="application/json")
 
 
-#Añade un usuario a la base de datos
+# Añade un usuario a la base de datos
 @app.route("/user/add", methods=["POST"])
 def create_user():
     usuario = request.json["usuario"]
@@ -217,11 +285,11 @@ def create_user():
     user = mongo.db.users.find_one({"usuario": usuario})
 
     if user is None:
-        hashed_password = generate_password_hash(password)
+        # hashed_password = generate_password_hash(password)
         id = mongo.db.users.insert_one(
             {
                 "usuario": usuario,
-                "password": hashed_password,
+                "password": password,
                 "recipes": recipes,
                 "favorites": favorites,
                 "pais": pais,
@@ -230,20 +298,16 @@ def create_user():
         )
 
         headers = {"Content-Type": "application/json"}
-        respuesta = jsonify({
-            "mensaje": "Usuario creado con exito",
-            "status": 200
-        })
-        #return Response(response, mimetype="application/json")
+        respuesta = jsonify({"mensaje": "Usuario creado con exito", "status": 200})
+        # return Response(response, mimetype="application/json")
         return make_response(respuesta, 200, headers)
     else:
         headers = {"Content-Type": "application/json"}
-        respuesta = jsonify(
-            {"message": "El usuario ya existe", "status": 404}
-        )
+        respuesta = jsonify({"message": "El usuario ya existe", "status": 404})
         return make_response(respuesta, 200, headers)
 
-#Valida si un usuario esta en la base de datos
+
+# Valida si un usuario esta en la base de datos
 @app.route("/user/validate", methods=["POST"])
 def validate_user():
     headers = {"Content-Type": "application/json"}
@@ -256,26 +320,28 @@ def validate_user():
     usuarioRecuperado = json.loads(jsuser)
 
     print(usuarioRecuperado)
-    if usuarioRecuperado["usuario"] == usuario :
-        respuesta = jsonify({
-            "message": "El usuario existe", 
-            "status": 200,
-            "data": usuarioRecuperado
-            }
+    if (
+        usuarioRecuperado["usuario"] == usuario
+        and usuarioRecuperado["password"] == password
+    ):
+        respuesta = jsonify(
+            {"message": "El usuario existe", "status": 200, "data": usuarioRecuperado}
         )
         return make_response(respuesta, 200, headers)
     else:
         response = jsonify({"message": "Usuario no existe ", "status": 404})
         return response
 
-#Retorna todos los usuarios
+
+# Retorna todos los usuarios
 @app.route("/users", methods=["GET"])
 def get_users():
     users = mongo.db.users.find()
     response = json_util.dumps(users)
     return Response(response, mimetype="application/json")
 
-#Busca un usuario en especifico por id
+
+# Busca un usuario en especifico por id
 @app.route("/user/<id>", methods=["GET"])
 def get_user(id):
     user = mongo.db.users.find_one({"_id": ObjectId(id)})
@@ -283,7 +349,8 @@ def get_user(id):
     response = json_util.dumps(user)
     return Response(response, mimetype="application/json")
 
-#Busca un usaurio por el nombre de usuaior
+
+# Busca un usaurio por el nombre de usuaior
 @app.route("/usere/<email>", methods=["GET"])
 def get_usere(email):
     user = mongo.db.users.find_one({"email": email})
@@ -291,7 +358,8 @@ def get_usere(email):
     response = json_util.dumps(user)
     return Response(response, mimetype="application/json")
 
-#Error
+
+# Error
 @app.errorhandler(404)
 def not_found(error=None):
     response = jsonify({"message": "Resource Not foud" + request.url, "status": 404})
