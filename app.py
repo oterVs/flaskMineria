@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, Response, make_response, flash, redirect
-from flask_cors import CORS, cross_origin
+
 
 from collections import Counter
 from werkzeug.utils import secure_filename
@@ -16,7 +16,7 @@ app = Flask(__name__)
 app.config[
     "MONGO_URI"
 ] = "mongodb+srv://OtterFox:1XTQqHNw9X7XvkXs@cluster0.uwltrza.mongodb.net/mineria"
-CORS(app)
+
 mongo = PyMongo(app)
 
 # Este metodo recupera todas las recetas disponibles
@@ -32,7 +32,7 @@ def get_recipestwy():
     return Response(response, mimetype="application/json")
 
 
-@cross_origin
+
 @app.route("/recipes/<size>/<pag>", methods=["GET"])
 def get_recipe_pag(size, pag):
     skips = int(size) * (int(pag) - 1)
@@ -144,20 +144,21 @@ def get_recipeFav():
     headers = {"Content-Type": "application/json"}
     recetas_recuperadas = []
     recetas = request.json["recetas"]
-    for x in recetas:
-        receta = mongo.db.recipes.find_one({"_id": ObjectId(x)})
-
-        objeto = json_util.dumps(receta, indent=2)
-        # print(objeto)
-        recetas_recuperadas.append(json.loads(objeto))
-
+  
+    if len(recetas) > 0:
+        print("entro")
+        for x in recetas:
+            receta = mongo.db.recipes.find_one({"_id": ObjectId(x)})
+            objeto = json_util.dumps(receta, indent=2)
+            recetas_recuperadas.append(json.loads(objeto))
+   
     # receta = mongo.db.recipes.find_one({"_id": ObjectId(id)})
-    res = jsonify(items=[dict(a=1, b=2), dict(c=3, d=4)])
-    response = json_util.dumps(recetas_recuperadas)
-    print(recetas_recuperadas[0])
-    respuesta = jsonify(
-        {"message": "Recipes", "status": 200, "data": recetas_recuperadas}
-    )
+    #res = jsonify(items=[dict(a=1, b=2), dict(c=3, d=4)])
+    #response = json_util.dumps(recetas_recuperadas)
+    #print(recetas_recuperadas[0])
+    #respuesta = jsonify(
+       # {"message": "Recipes", "status": 200, "data": recetas_recuperadas}
+    #)
     diccionario = {"data": recetas_recuperadas}
     return diccionario
 
