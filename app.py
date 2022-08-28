@@ -286,11 +286,11 @@ def create_user():
     user = mongo.db.users.find_one({"usuario": usuario})
 
     if user is None:
-        # hashed_password = generate_password_hash(password)
+        hashed_password = generate_password_hash(password)
         id = mongo.db.users.insert_one(
             {
                 "usuario": usuario,
-                "password": password,
+                "password": hashed_password,
                 "recipes": recipes,
                 "favorites": favorites,
                 "pais": pais,
@@ -320,10 +320,12 @@ def validate_user():
     jsuser = json_util.dumps(user)
     usuarioRecuperado = json.loads(jsuser)
 
+    result = check_password_hash( usuarioRecuperado["password"],password)
+    print(result)
     print(usuarioRecuperado)
     if (
         usuarioRecuperado["usuario"] == usuario
-        and usuarioRecuperado["password"] == password
+        and result
     ):
         respuesta = jsonify(
             {"message": "El usuario existe", "status": 200, "data": usuarioRecuperado}
