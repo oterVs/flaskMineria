@@ -185,15 +185,15 @@ def post_photo():
     for file in request.files:
        fil = request.files[file]
        #image = np.asarray(bytearray(fil.read()), dtype="uint8")
-      # imagendecode = cv2.imdecode(image, cv2.IMREAD_COLOR)
+       #imagendecode = cv2.imdecode(image, cv2.IMREAD_COLOR)
        new_width = 200
        new_height = 200
 # dsize
        dsize = (new_width, new_height)
  
-# redimencionar la image
-      # output = cv2.resize(imagendecode, dsize, interpolation = cv2.INTER_AREA)
-       #imagenes.append(output)
+    # redimencionar la image
+    #output = cv2.resize(imagendecode, dsize, interpolation = cv2.INTER_AREA)
+    #imagenes.append(output)
       
     #imagen1 = cv2.imread("imagen2.jpg")
     #imagen2 = cv2.imread("imagen2.jpg")
