@@ -1,9 +1,10 @@
 from flask import Flask, jsonify, request, Response, make_response, flash, redirect
 
-
+from PIL import Image 
+import numpy as np
 from collections import Counter
 from werkzeug.utils import secure_filename
-
+import cv2
 import collections
 import json
 from flask_pymongo import PyMongo
@@ -62,17 +63,184 @@ def get_recipe_ingredientes():
     diccionario = {"data": respuesta}
     return diccionario
 
+@app.route("/opencv", methods=["POST"])
+def opencv():
+    # print("Posted file: {}".format(request.files['data']))
+    file = request.files["file"]
+    
+    
+    image = np.asarray(bytearray(file.read()), dtype="uint8")
+
+    #numpy.fromstring(request.files["file"].read(), numpy.uint8)
+    imagen1 = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    imagen2 = cv2.imdecode(image, cv2.IMREAD_COLOR)
+
+
+    new_width = 200
+    new_height = 200
+
+    dsize = (new_width, new_height)
+ 
+# redimencionar la image
+    #output = cv2.resize(imagendecode, dsize, interpolation = cv2.INTER_AREA)
+    #imagenes.append(output)
+    
+
+    concat_vertical = cv2.vconcat([imagen1, imagen2])
+
+    im = Image.open(concat_vertical)
+
+    im.save('./cover_2.jpg', format='JPEG', quality=95)
+
+    cv2.imshow('concat_vertical', concat_vertical)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    diccionario = {
+        "status": 200,
+        "ingredientsDetected": ["apple", "cheese"],
+        "data": [
+            {
+                "_id": {"$oid": "62f3cf79944789e684ef1213"},
+                "countedElements": 1,
+                "duration": "1 hora",
+                "imageUrl": "https://www.cocina-ecuatoriana.com/base/stock/Recipe/310-image/310-image_web.jpg",
+                "ingredients": [
+                    "squid",
+                    "Garlic",
+                    "cumin",
+                    "Salt",
+                    "lemon",
+                    "egg",
+                    "flour",
+                    "bread",
+                    "oil",
+                    "Pepper",
+                ],
+                "link": "https://www.cocina-ecuatoriana.com/recetas/entradas/calamares-fritos",
+                "steps": [
+                    "Lavar bien los calamares y córtelos en ruedas.",
+                    "Coloque los calamares en un bol y agregue el ajo machacado, comino, pimienta, salsa de soya y el jugo de limón.",
+                    "Mezcle bien todos los ingredientes y cubra el bol con papel film. Deje macerar en el refrigerador por unas 2 horas aproximadamente.",
+                    "Transcurrido el tiempo de maceración, pase los calamares por harina, luego por huevo batido y por último por la miga de pan.",
+                    "Fría los calamares en aceite bien caliente hasta que se doren.",
+                    "Sírvalos decorados con rodajas de limón y acompañados con alguna salsa de su preferencia.",
+                ],
+                "title": "Calamares fritos",
+            },
+            {
+                "_id": {"$oid": "62f3cf79944789e684ef1213"},
+                "countedElements": 1,
+                "duration": "1 hora",
+                "imageUrl": "https://www.cocina-ecuatoriana.com/base/stock/Recipe/310-image/310-image_web.jpg",
+                "ingredients": [
+                    "squid",
+                    "Garlic",
+                    "cumin",
+                    "Salt",
+                    "lemon",
+                    "egg",
+                    "flour",
+                    "bread",
+                    "oil",
+                    "Pepper",
+                ],
+                "link": "https://www.cocina-ecuatoriana.com/recetas/entradas/calamares-fritos",
+                "steps": [
+                    "Lavar bien los calamares y córtelos en ruedas.",
+                    "Coloque los calamares en un bol y agregue el ajo machacado, comino, pimienta, salsa de soya y el jugo de limón.",
+                    "Mezcle bien todos los ingredientes y cubra el bol con papel film. Deje macerar en el refrigerador por unas 2 horas aproximadamente.",
+                    "Transcurrido el tiempo de maceración, pase los calamares por harina, luego por huevo batido y por último por la miga de pan.",
+                    "Fría los calamares en aceite bien caliente hasta que se doren.",
+                    "Sírvalos decorados con rodajas de limón y acompañados con alguna salsa de su preferencia.",
+                ],
+                "title": "Calamares fritos",
+            }
+        ],
+    }
+    return diccionario
+    
+    # image = {'image': file.read()}
+    # print(image)
+    # headers = {
+    # "Content-Type": "multipart/form-data",
+    # }
+    # ficheros = {
+    #   "image": image
+    # }
+    return "oka"
+    # r = requests.post("https://api.imgbb.com/1/upload?expiration=600&key=5eb17d3638835e60af978041f015e33c",headers=headers, files=image)
+    # print(r)
+    # if r.ok:
 
 # Guarda una imagen
 @app.route("/savePhto", methods=["POST"])
 def post_photo():
     # print("Posted file: {}".format(request.files['data']))
-    file = request.files["file"]
-    print(file)
-
+    files = request.files["file0"]
+    print(files)
+    print(type(files))
+    imagenes = []
+    #print(file)
+    for file in request.files:
+       fil = request.files[file]
+       image = np.asarray(bytearray(fil.read()), dtype="uint8")
+       imagendecode = cv2.imdecode(image, cv2.IMREAD_COLOR)
+       new_width = 200
+       new_height = 200
+# dsize
+       dsize = (new_width, new_height)
+ 
+# redimencionar la image
+       output = cv2.resize(imagendecode, dsize, interpolation = cv2.INTER_AREA)
+       imagenes.append(output)
+      
+    #imagen1 = cv2.imread("imagen2.jpg")
+    #imagen2 = cv2.imread("imagen2.jpg")
+    
+    #image = np.asarray(bytearray(file.read()), dtype="uint8")
+    #numpy.fromstring(request.files["file"].read(), numpy.uint8)
+    #imagen1 = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    #imagen2 = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    
+    concat_vertical = cv2.vconcat(imagenes)
+    cv2.imwrite('./imagencombinada.png',concat_vertical) 
+    cv2.imshow('concat_vertical', concat_vertical)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    
     diccionario = {
         "status": 200,
+        "ingredientsDetected": ["appel", "cumin", "oil"],
         "data": [
+            {
+                "_id": {"$oid": "62f3cf79944789e684ef1213"},
+                "countedElements": 1,
+                "duration": "1 hora",
+                "imageUrl": "https://www.cocina-ecuatoriana.com/base/stock/Recipe/310-image/310-image_web.jpg",
+                "ingredients": [
+                    "squid",
+                    "Garlic",
+                    "cumin",
+                    "Salt",
+                    "lemon",
+                    "egg",
+                    "flour",
+                    "bread",
+                    "oil",
+                    "Pepper",
+                ],
+                "link": "https://www.cocina-ecuatoriana.com/recetas/entradas/calamares-fritos",
+                "steps": [
+                    "Lavar bien los calamares y córtelos en ruedas.",
+                    "Coloque los calamares en un bol y agregue el ajo machacado, comino, pimienta, salsa de soya y el jugo de limón.",
+                    "Mezcle bien todos los ingredientes y cubra el bol con papel film. Deje macerar en el refrigerador por unas 2 horas aproximadamente.",
+                    "Transcurrido el tiempo de maceración, pase los calamares por harina, luego por huevo batido y por último por la miga de pan.",
+                    "Fría los calamares en aceite bien caliente hasta que se doren.",
+                    "Sírvalos decorados con rodajas de limón y acompañados con alguna salsa de su preferencia.",
+                ],
+                "title": "Calamares fritos",
+            },
             {
                 "_id": {"$oid": "62f3cf79944789e684ef1213"},
                 "countedElements": 1,
