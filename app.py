@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 from collections import Counter
 from werkzeug.utils import secure_filename
-import cv2
+
 import collections
 import json
 from flask_pymongo import PyMongo
@@ -14,7 +14,6 @@ from bson.objectid import ObjectId
 from dotenv import load_doteenv
 import os
 load_doteenv()
-
 app = Flask(__name__)
 
 
@@ -76,8 +75,8 @@ def opencv():
     image = np.asarray(bytearray(file.read()), dtype="uint8")
 
     #numpy.fromstring(request.files["file"].read(), numpy.uint8)
-    imagen1 = cv2.imdecode(image, cv2.IMREAD_COLOR)
-    imagen2 = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    #imagen1 = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    #imagen2 = cv2.imdecode(image, cv2.IMREAD_COLOR)
 
 
     new_width = 200
@@ -90,15 +89,15 @@ def opencv():
     #imagenes.append(output)
     
 
-    concat_vertical = cv2.vconcat([imagen1, imagen2])
+    #concat_vertical = cv2.vconcat([imagen1, imagen2])
 
-    im = Image.open(concat_vertical)
+    #im = Image.open(concat_vertical)
 
-    im.save('./cover_2.jpg', format='JPEG', quality=95)
+   # im.save('./cover_2.jpg', format='JPEG', quality=95)
 
-    cv2.imshow('concat_vertical', concat_vertical)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+   #cv2.imshow('concat_vertical', concat_vertical)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
 
     diccionario = {
         "status": 200,
@@ -189,15 +188,15 @@ def post_photo():
     for file in request.files:
        fil = request.files[file]
        image = np.asarray(bytearray(fil.read()), dtype="uint8")
-       imagendecode = cv2.imdecode(image, cv2.IMREAD_COLOR)
+      # imagendecode = cv2.imdecode(image, cv2.IMREAD_COLOR)
        new_width = 200
        new_height = 200
 # dsize
        dsize = (new_width, new_height)
  
 # redimencionar la image
-       output = cv2.resize(imagendecode, dsize, interpolation = cv2.INTER_AREA)
-       imagenes.append(output)
+      # output = cv2.resize(imagendecode, dsize, interpolation = cv2.INTER_AREA)
+       #imagenes.append(output)
       
     #imagen1 = cv2.imread("imagen2.jpg")
     #imagen2 = cv2.imread("imagen2.jpg")
@@ -207,11 +206,11 @@ def post_photo():
     #imagen1 = cv2.imdecode(image, cv2.IMREAD_COLOR)
     #imagen2 = cv2.imdecode(image, cv2.IMREAD_COLOR)
     
-    concat_vertical = cv2.vconcat(imagenes)
-    cv2.imwrite('./imagencombinada.png',concat_vertical) 
-    cv2.imshow('concat_vertical', concat_vertical)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+   # concat_vertical = cv2.vconcat(imagenes)
+    #cv2.imwrite('./imagencombinada.png',concat_vertical) 
+    #cv2.imshow('concat_vertical', concat_vertical)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
     
     diccionario = {
         "status": 200,
