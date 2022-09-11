@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request, Response, make_response, flash, redirect
 
 from PIL import Image 
-import numpy as np
 from collections import Counter
 from werkzeug.utils import secure_filename
 
@@ -11,9 +10,8 @@ from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson import json_util
 from bson.objectid import ObjectId
-from dotenv import load_doteenv
-import os
-load_doteenv()
+
+
 app = Flask(__name__)
 
 
@@ -72,7 +70,7 @@ def opencv():
     file = request.files["file"]
     
     
-    image = np.asarray(bytearray(file.read()), dtype="uint8")
+    #image = np.asarray(bytearray(file.read()), dtype="uint8")
 
     #numpy.fromstring(request.files["file"].read(), numpy.uint8)
     #imagen1 = cv2.imdecode(image, cv2.IMREAD_COLOR)
@@ -187,7 +185,7 @@ def post_photo():
     #print(file)
     for file in request.files:
        fil = request.files[file]
-       image = np.asarray(bytearray(fil.read()), dtype="uint8")
+       #image = np.asarray(bytearray(fil.read()), dtype="uint8")
       # imagendecode = cv2.imdecode(image, cv2.IMREAD_COLOR)
        new_width = 200
        new_height = 200
