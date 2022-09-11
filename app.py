@@ -11,12 +11,16 @@ from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson import json_util
 from bson.objectid import ObjectId
+from dotenv import load_doteenv
+import os
+load_doteenv()
 
 app = Flask(__name__)
 
+
 app.config[
     "MONGO_URI"
-] = "mongodb+srv://OtterFox:1XTQqHNw9X7XvkXs@cluster0.uwltrza.mongodb.net/mineria"
+] = "mongodb+srv://OtterFox:"+os.getenv("MONGO_PASSWORD")+"@cluster0.uwltrza.mongodb.net/mineria"
 
 mongo = PyMongo(app)
 
