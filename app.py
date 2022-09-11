@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 app.config[
     "MONGO_URI"
-] = "mongodb+srv://OtterFox:sqbZeoBKy8Qp6fd@cluster0.uwltrza.mongodb.net/mineria"
+] = "mongodb+srv://OtterFox:@cluster0.uwltrza.mongodb.net/mineria"
 
 mongo = PyMongo(app)
 
@@ -32,7 +32,6 @@ def get_recipestwy():
         {"message": "Recipes", "status": 200, "data": recipesRecuperadas}
     )
     return Response(response, mimetype="application/json")
-
 
 
 @app.route("/recipes/<size>/<pag>", methods=["GET"])
